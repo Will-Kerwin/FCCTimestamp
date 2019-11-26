@@ -22,14 +22,17 @@ const listener = app.listen(process.env.PORT, function() {
 });
 
 app.get("/api/timestamp/:date_string", (req, res) => {
-  const {date_string} = req.params
-  if (date_string.isValid()){
-   let date = new Date(date_string) 
-   res.json({"unix":date.getTime(), "utc" : date.toUTCString()});
-  }else if (date_string === ""){
-    let date = new Date()
-    res.json({"unix":date.getTime(), "utc" : date.toUTCString()})
-  } else{
-    res.json({error: "Invalid Date"})
+  const param = req.params.date_string
+  const currentDate = new Date()
+  
+   if (param == undefined) {
+    res.json({ "unix": currentDate.getTime(), "utc": currentDate.toUTCString() })
+  } else if (isNaN(param) && new Date(param).toString() != "Invalid Date") { // 2015-12-25
+    res.json({ "unix": new Date(param).getTime(), "utc": new Date(param).toUTCString() })
+  } else if (!isNaN(param) && new Date(param * 1000).toString() != "Invalid Date") { // 1450137600
+    res.json({ "unix": param, "utc": new Date(param * 1000).toUTCString() })
+  } else {
+    res.json({ "error": "Invalid Date" })
   }
+  
 });
